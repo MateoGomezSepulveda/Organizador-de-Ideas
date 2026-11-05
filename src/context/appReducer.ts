@@ -266,6 +266,35 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       };
     }
 
+    case 'UPDATE_VALIDATION_STEP': {
+      const { ideaId, stepId, text } = action.payload;
+      const cleanText = sanitizeText(text, 300);
+      if (!cleanText) return state;
+
+      let changed = false;
+      const nextIdeas = state.ideas.map((idea) => {
+        if (idea.id !== ideaId) return idea;
+        const nextSteps = idea.validationSteps.map((step) => {
+          if (step.id !== stepId || step.text === cleanText) return step;
+          changed = true;
+          return { ...step, text: cleanText };
+        });
+        if (!changed) return idea;
+        return {
+          ...idea,
+          validationSteps: nextSteps,
+          updatedAt: now,
+        };
+      });
+
+      if (!changed) return state;
+      return {
+        ...state,
+        ideas: nextIdeas,
+        lastUpdated: now,
+      };
+    }
+
     case 'TOGGLE_VALIDATION_STEP': {
       const { ideaId, stepId } = action.payload;
       let changed = false;

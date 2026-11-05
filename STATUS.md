@@ -1,11 +1,12 @@
 # Estado del Proyecto — IdeaVault (Organizador de Ideas)
 
 **Estado General:** 🟢 Completado y Simplificado al 100% (Interfaz Minimalista + Agente IA Razonamiento Profundo + Roadmap en Word + Tablero Arrastrable)
-**Última Actualización:** 2026-11-02
+**Última Actualización:** 2026-11-05
 
 ---
 
 ## Últimas Mejoras de Simplicidad, IA y UX
+- **Edición en Línea de Tareas / Pasos (`UPDATE_VALIDATION_STEP`):** Ahora cada tarea dentro de [`IdeaDetailDrawer.tsx`](src/components/ideas/IdeaDetailDrawer.tsx) cuenta con edición directa en línea (botón `Pencil`, guardado con `Enter` o botón `Check` y cancelación con `Escape`), respaldada de forma inmutable en [`appReducer.ts`](src/context/appReducer.ts) y tipada en [`domain.ts`](src/types/domain.ts).
 - **Cabecera Minimalista sin Respaldo/Importación:** Se eliminó el botón y modal de respaldo/importación de DB en [`Header.tsx`](src/components/layout/Header.tsx) y [`App.tsx`](src/App.tsx) para mantener la barra superior limpia.
 - **Movimiento de Tarjetas con el Cursor (Cuadrícula Drag & Drop + Pizarra Libre):** En [`IdeaBoardView.tsx`](src/components/ideas/IdeaBoardView.tsx) e [`IdeaCard.tsx`](src/components/ideas/IdeaCard.tsx) se permite arrastrar y soltar tarjetas para reordenarlas libremente (`REORDER_IDEAS`) o activar el modo **Pizarra Libre** para colocarlas en cualquier coordenada `(x, y)` (`MOVE_IDEA_POSITION`).
 - **Agente de IA con Modelos de Razonamiento Profundo:** [`aiAgentService.ts`](src/services/aiAgentService.ts) actualizado a `gemini-2.5-pro` / `gemini-2.5-flash` (y `gpt-4o` / `grok-2-latest` / `llama-3.3-70b-versatile`) con ventana de pensamiento extendida a 60s para estructurar propuestas profundas, problema, hipótesis y hoja de ruta por fases.

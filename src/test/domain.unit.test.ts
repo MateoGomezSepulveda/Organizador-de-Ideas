@@ -54,6 +54,27 @@ describe('Unit Tests — Reducer, Métricas, Fechas, Storage y Perfiles por Usua
       payload: { id: 'unit-idea-1', stage: 'building' },
     });
     expect(movedState.ideas[0].stage).toBe('building');
+
+    const withStep = appReducer(movedState, {
+      type: 'ADD_VALIDATION_STEP',
+      payload: {
+        ideaId: 'unit-idea-1',
+        stepId: 'step-edit-1',
+        text: 'Tarea con error de escritura',
+      },
+    });
+    const editedStep = appReducer(withStep, {
+      type: 'UPDATE_VALIDATION_STEP',
+      payload: {
+        ideaId: 'unit-idea-1',
+        stepId: 'step-edit-1',
+        text: 'Tarea corregida perfectamente',
+      },
+    });
+    const targetStep = editedStep.ideas[0].validationSteps.find(
+      (s) => s.id === 'step-edit-1'
+    );
+    expect(targetStep?.text).toBe('Tarea corregida perfectamente');
   });
 
   it('guarda y restaura de forma aislada las ideas del perfil de cada usuario por UID', () => {

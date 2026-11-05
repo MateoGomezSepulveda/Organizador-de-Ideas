@@ -11,6 +11,8 @@ import {
   Send,
   FileText,
   Map,
+  Pencil,
+  Check,
 } from 'lucide-react';
 import { IDEA_CATEGORIES } from '../../constants/theme';
 import { useAppDispatch, useAppState } from '../../context/AppContext';
@@ -28,6 +30,8 @@ export const IdeaDetailDrawer: React.FC = () => {
   const dispatch = useAppDispatch();
 
   const [newStepText, setNewStepText] = useState('');
+  const [editingStepId, setEditingStepId] = useState<string | null>(null);
+  const [editingStepText, setEditingStepText] = useState('');
   const [aiQuestion, setAiQuestion] = useState('');
   const [aiReply, setAiReply] = useState<string | null>(null);
   const [aiError, setAiError] = useState<string | null>(null);
@@ -48,6 +52,8 @@ export const IdeaDetailDrawer: React.FC = () => {
   const handleClose = () => {
     setAiReply(null);
     setAiError(null);
+    setEditingStepId(null);
+    setEditingStepText('');
     dispatch({ type: 'SELECT_IDEA', payload: { id: null } });
   };
 
@@ -59,6 +65,28 @@ export const IdeaDetailDrawer: React.FC = () => {
       payload: { ideaId: idea.id, text: newStepText },
     });
     setNewStepText('');
+  };
+
+  const handleStartEditStep = (stepId: string, currentText: string) => {
+    setEditingStepId(stepId);
+    setEditingStepText(currentText);
+  };
+
+  const handleSaveEditStep = (stepId: string) => {
+    const trimmed = editingStepText.trim();
+    if (trimmed) {
+      dispatch({
+        type: 'UPDATE_VALIDATION_STEP',
+        payload: { ideaId: idea.id, stepId, text: trimmed },
+      });
+    }
+    setEditingStepId(null);
+    setEditingStepText('');
+  };
+
+  const handleCancelEditStep = () => {
+    setEditingStepId(null);
+    setEditingStepText('');
   };
 
   const handleExpandWithAi = async () => {
@@ -447,52 +475,110 @@ export const IdeaDetailDrawer: React.FC = () => {
             </div>
 
             <div className="space-y-2">
-              {idea.validationSteps.map((step) => (
-                <div
-                  key={step.id}
-                  className="flex items-center justify-between gap-2 rounded-xl bg-slate-50 dark:bg-slate-950 px-3 py-2"
-                >
-                  <button
-                    type="button"
-                    data-testid={`toggle-step-${step.id}`}
-                    onClick={() =>
-                      dispatch({
-                        type: 'TOGGLE_VALIDATION_STEP',
-                        payload: { ideaId: idea.id, stepId: step.id },
-                      })
-                    }
-                    className="flex flex-1 cursor-pointer items-center gap-2.5 text-left text-sm"
+              {idea.validationSteps.map((step) => {
+                const isEditing = editingStepId === step.id;
+
+                return (
+                  <div
+                    key={step.id}
+                    className="flex items-center justify-between gap-2 rounded-xl bg-slate-50 dark:bg-slate-950 px-3 py-2 transition-colors duration-200"
                   >
-                    {step.completed ? (
-                      <CheckSquare className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                    {isEditing ? (
+                      <div className="flex flex-1 items-center gap-2">
+                        <input
+                          type="text"
+                          data-testid={`edit-step-input-${step.id}`}
+                          value={editingStepText}
+                          autoFocus
+                          onChange={(e) => setEditingStepText(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              handleSaveEditStep(step.id);
+                            } else if (e.key === 'Escape') {
+                              handleCancelEditStep();
+                            }
+                          }}
+                          className="flex-1 rounded-lg border border-teal-500 bg-white dark:bg-slate-900 px-2.5 py-1 text-sm text-slate-900 dark:text-slate-100 focus:outline-none"
+                        />
+                        <button
+                          type="button"
+                          data-testid={`save-step-${step.id}`}
+                          aria-label="Guardar cambios de tarea"
+                          onClick={() => handleSaveEditStep(step.id)}
+                          className="inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg bg-teal-600 text-white transition-colors duration-200 hover:bg-teal-700"
+                        >
+                          <Check className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          aria-label="Cancelar edición"
+                          onClick={handleCancelEditStep}
+                          className="inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg text-slate-400 transition-colors duration-200 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-slate-600"
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
                     ) : (
-                      <Square className="h-4 w-4 shrink-0 text-slate-400" />
+                      <>
+                        <button
+                          type="button"
+                          data-testid={`toggle-step-${step.id}`}
+                          onClick={() =>
+                            dispatch({
+                              type: 'TOGGLE_VALIDATION_STEP',
+                              payload: { ideaId: idea.id, stepId: step.id },
+                            })
+                          }
+                          className="flex flex-1 cursor-pointer items-center gap-2.5 text-left text-sm"
+                        >
+                          {step.completed ? (
+                            <CheckSquare className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                          ) : (
+                            <Square className="h-4 w-4 shrink-0 text-slate-400" />
+                          )}
+                          <span
+                            className={cn(
+                              step.completed
+                                ? 'line-through text-slate-400 dark:text-slate-500'
+                                : 'text-slate-800 dark:text-slate-200'
+                            )}
+                          >
+                            {step.text}
+                          </span>
+                        </button>
+
+                        <div className="flex items-center gap-1">
+                          <button
+                            type="button"
+                            data-testid={`edit-step-${step.id}`}
+                            aria-label={`Editar paso ${step.text}`}
+                            onClick={() =>
+                              handleStartEditStep(step.id, step.text)
+                            }
+                            className="inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg text-slate-400 transition-colors duration-200 hover:bg-slate-200/70 dark:hover:bg-slate-800 hover:text-teal-600 dark:hover:text-teal-400"
+                          >
+                            <Pencil className="h-3.5 w-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            aria-label={`Eliminar paso ${step.text}`}
+                            onClick={() =>
+                              dispatch({
+                                type: 'DELETE_VALIDATION_STEP',
+                                payload: { ideaId: idea.id, stepId: step.id },
+                              })
+                            }
+                            className="inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg text-slate-400 transition-colors duration-200 hover:bg-rose-50 dark:hover:bg-rose-950/50 hover:text-rose-600"
+                          >
+                            <X className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      </>
                     )}
-                    <span
-                      className={cn(
-                        step.completed
-                          ? 'line-through text-slate-400 dark:text-slate-500'
-                          : 'text-slate-800 dark:text-slate-200'
-                      )}
-                    >
-                      {step.text}
-                    </span>
-                  </button>
-                  <button
-                    type="button"
-                    aria-label={`Eliminar paso ${step.text}`}
-                    onClick={() =>
-                      dispatch({
-                        type: 'DELETE_VALIDATION_STEP',
-                        payload: { ideaId: idea.id, stepId: step.id },
-                      })
-                    }
-                    className="cursor-pointer text-slate-400 hover:text-rose-600"
-                  >
-                    <X className="h-3.5 w-3.5" />
-                  </button>
-                </div>
-              ))}
+                  </div>
+                );
+              })}
             </div>
 
             <form onSubmit={handleAddStep} className="mt-3 flex gap-2">

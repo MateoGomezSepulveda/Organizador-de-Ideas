@@ -165,6 +165,10 @@ export type AppAction =
       payload: { ideaId: string; text: string; stepId?: string };
     }
   | {
+      type: 'UPDATE_VALIDATION_STEP';
+      payload: { ideaId: string; stepId: string; text: string };
+    }
+  | {
       type: 'TOGGLE_VALIDATION_STEP';
       payload: { ideaId: string; stepId: string };
     }
