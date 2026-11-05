@@ -6,6 +6,7 @@
 ---
 
 ## Últimas Mejoras de Simplicidad, IA y UX
+- **Puente Silencioso hacia el Dashboard de Tareas ([`dashboardBridgeService.ts`](src/services/dashboardBridgeService.ts)):** Publica automáticamente en segundo plano las ideas reales creadas por el usuario (excluyendo los 3 ejemplos semilla) hacia el **Dashboard de Tareas** vía `localStorage`, `BroadcastChannel` y Cloud Firestore (`dashboard-personal-mateo`), sin alterar la interfaz del Organizador.
 - **Edición en Línea de Tareas / Pasos (`UPDATE_VALIDATION_STEP`):** Ahora cada tarea dentro de [`IdeaDetailDrawer.tsx`](src/components/ideas/IdeaDetailDrawer.tsx) cuenta con edición directa en línea (botón `Pencil`, guardado con `Enter` o botón `Check` y cancelación con `Escape`), respaldada de forma inmutable en [`appReducer.ts`](src/context/appReducer.ts) y tipada en [`domain.ts`](src/types/domain.ts).
 - **Cabecera Minimalista sin Respaldo/Importación:** Se eliminó el botón y modal de respaldo/importación de DB en [`Header.tsx`](src/components/layout/Header.tsx) y [`App.tsx`](src/App.tsx) para mantener la barra superior limpia.
 - **Movimiento de Tarjetas con el Cursor (Cuadrícula Drag & Drop + Pizarra Libre):** En [`IdeaBoardView.tsx`](src/components/ideas/IdeaBoardView.tsx) e [`IdeaCard.tsx`](src/components/ideas/IdeaCard.tsx) se permite arrastrar y soltar tarjetas para reordenarlas libremente (`REORDER_IDEAS`) o activar el modo **Pizarra Libre** para colocarlas en cualquier coordenada `(x, y)` (`MOVE_IDEA_POSITION`).

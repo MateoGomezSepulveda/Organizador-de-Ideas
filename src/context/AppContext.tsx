@@ -23,6 +23,7 @@ import {
   saveStateToCloud,
   subscribeToCloudState,
 } from '../services/firebase';
+import { syncIdeasToPersonalDashboard } from '../services/dashboardBridgeService';
 import { useAuth } from './AuthContext';
 
 export type SyncStatus = 'local' | 'syncing' | 'synced';
@@ -134,6 +135,8 @@ export const AppProvider: React.FC<{
     } else {
       saveStateToStorage(state);
     }
+
+    syncIdeasToPersonalDashboard(state.ideas);
   }, [state, user, isAuthLoading]);
 
   // 3. Sincronización multi-pestaña en Modo Local (sin sesión)
